@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เครื่องมือสร้างประกาศภาษารัสเซีย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@600;700&family=Nunito:wght@400;600;700;800&family=Noto+Sans+Thai+Looped:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Layout: two-column sticker workspace. Left panel picks the announcement type and collects details; right column shows three colour-coded result cards (coral = Russian, sky = English, mint = reading aid). Mascot "น้องบิน" chats from the header. */
+  :root{
+    --font-display:'Mali','Noto Sans Thai Looped','Nunito',sans-serif;
+    --font-body:'Nunito','Noto Sans Thai Looped',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --bg:#E6F4FF; --bg2:#FFF0E3; --panel:#FFFFFF; --field:#F4FAFF; --line:#C9E0F4;
+    --ink:#26324D; --ink-soft:#586783;
+    --blue:#2F7BE5; --on-blue:#FFFFFF;
+    --pink:#D13B6F; --on-pink:#FFFFFF;
+    --ru-bg:#FFEDE9; --ru-line:#FFBBAE; --ru-ink:#5A1E16; --ru-pill:#C4402B; --on-ru-pill:#FFFFFF;
+    --en-bg:#E5F1FF; --en-line:#A9D1F7; --en-ink:#15406F; --en-pill:#2760B5; --on-en-pill:#FFFFFF;
+    --tl-bg:#E3F7EC; --tl-line:#A6DDC1; --tl-ink:#1A4E35; --tl-pill:#1F7650; --on-tl-pill:#FFFFFF;
+    --chip-bg:#FFF2C2; --chip-line:#EED36E; --chip-ink:#574000; --chip-pill:#8A6500; --on-chip-pill:#FFFFFF;
+    --peach-bg:#FFF2E2; --peach-line:#FFD39B;
+    --pop:rgba(47,123,229,0.16);
+    --bubble:#FFFFFF;
+    --m-body:#FFFFFF; --m-line:#26324D; --m-wing:#FF9FB8; --m-cap:#79CFA7; --m-band:#C2EBD7;
+    --m-pom:#FFD36B; --m-stripe:#BCDCFF; --m-cheek:#FF9DB2; --m-cloud:#FFFFFF; --m-prop:#26324D;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#101A31; --bg2:#1B1D3D; --panel:#18284A; --field:#112040; --line:#2F4676;
+      --ink:#F2F0FA; --ink-soft:#AAB8D4;
+      --blue:#7DB7FF; --on-blue:#0E1C37;
+      --pink:#FF8DB0; --on-pink:#3A0F20;
+      --ru-bg:#41252F; --ru-line:#7C4150; --ru-ink:#FFDAD3; --ru-pill:#FF9C88; --on-ru-pill:#3A130D;
+      --en-bg:#1A3457; --en-line:#3B6698; --en-ink:#D2E8FF; --en-pill:#8EC4FF; --on-en-pill:#0C2442;
+      --tl-bg:#1A4034; --tl-line:#34705A; --tl-ink:#D3F5E3; --tl-pill:#7ED8AB; --on-tl-pill:#0B2A1D;
+      --chip-bg:#493F1E; --chip-line:#7D6E2E; --chip-ink:#FFE9A6; --chip-pill:#FFD36B; --on-chip-pill:#3A2A00;
+      --peach-bg:#3A2D22; --peach-line:#7B5A31;
+      --pop:rgba(0,0,0,0.35);
+      --bubble:#1F3157;
+      --m-body:#F6F8FF; --m-line:#1B2744; --m-cloud:#3A4F80;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#101A31; --bg2:#1B1D3D; --panel:#18284A; --field:#112040; --line:#2F4676;
+    --ink:#F2F0FA; --ink-soft:#AAB8D4;
+    --blue:#7DB7FF; --on-blue:#0E1C37;
+    --pink:#FF8DB0; --on-pink:#3A0F20;
+    --ru-bg:#41252F; --ru-line:#7C4150; --ru-ink:#FFDAD3; --ru-pill:#FF9C88; --on-ru-pill:#3A130D;
+    --en-bg:#1A3457; --en-line:#3B6698; --en-ink:#D2E8FF; --en-pill:#8EC4FF; --on-en-pill:#0C2442;
+    --tl-bg:#1A4034; --tl-line:#34705A; --tl-ink:#D3F5E3; --tl-pill:#7ED8AB; --on-tl-pill:#0B2A1D;
+    --chip-bg:#493F1E; --chip-line:#7D6E2E; --chip-ink:#FFE9A6; --chip-pill:#FFD36B; --on-chip-pill:#3A2A00;
+    --peach-bg:#3A2D22; --peach-line:#7B5A31;
+    --pop:rgba(0,0,0,0.35);
+    --bubble:#1F3157;
+    --m-body:#F6F8FF; --m-line:#1B2744; --m-cloud:#3A4F80;
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background-color:var(--bg);
+    background-image:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:15px;
+    line-height:1.5;
+    padding-inline:16px;
+    padding-block:20px 56px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;}
+  .hidden{display:none !important;}
+
+  /* ---------- header + mascot ---------- */
+  .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 28px;margin-bottom:22px;}
+  .top-text{flex:1 1 340px;min-width:0;}
+  .eyebrow{
+    display:inline-block;margin:0 0 10px;padding:3px 12px;border-radius:999px;
+    background:var(--en-pill);color:var(--on-en-pill);
+    font-size:12px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;
+  }
+  h1{
+    margin:0 0 8px;font-family:var(--font-display);font-weight:700;
+    font-size:clamp(25px,4vw,36px);line-height:1.25;text-wrap:balance;
+  }
+  .subtitle{margin:0;color:var(--ink-soft);max-width:58ch;}
+
+  .buddy{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:12px;width:250px;max-width:100%;}
+  .bubble{
+    position:relative;margin:0;padding:9px 14px;width:100%;text-align:center;
+    background:var(--bubble);border:2px solid var(--line);border-radius:18px;
+    box-shadow:0 3px 0 var(--pop);font-weight:800;font-size:14px;line-height:1.4;
+  }
+  .bubble::after{
+    content:"";position:absolute;width:14px;height:14px;background:var(--bubble);
+    border-right:2px solid var(--line);border-bottom:2px solid var(--line);
+    bottom:-9px;left:50%;transform:translateX(-50%) rotate(45deg);
+  }
+  .mascot{display:block;width:190px;max-width:100%;height:auto;overflow:visible;}
+  .mascot .m-wing{fill:var(--m-wing);stroke:var(--m-line);stroke-width:3;stroke-linejoin:round;}
+  .mascot .m-body{fill:var(--m-body);}
+  .mascot .m-outline{fill:none;stroke:var(--m-line);stroke-width:3;}
+  .mascot .m-stripe{fill:var(--m-stripe);}
+  .mascot .m-cap{fill:var(--m-cap);stroke:var(--m-line);stroke-width:3;stroke-linejoin:round;}
+  .mascot .m-band{fill:var(--m-band);stroke:var(--m-line);stroke-width:3;stroke-linejoin:round;}
+  .mascot .m-pom{fill:var(--m-pom);stroke:var(--m-line);stroke-width:3;}
+  .mascot .m-eye{fill:var(--m-line);}
+  .mascot .m-spark{fill:#FFFFFF;}
+  .mascot .m-cheek{fill:var(--m-cheek);opacity:0.85;}
+  .mascot .m-mouth{fill:none;stroke:var(--m-line);stroke-width:3;stroke-linecap:round;}
+  .mascot .m-nose{fill:var(--m-wing);stroke:var(--m-line);stroke-width:3;}
+  .mascot .m-prop ellipse{fill:var(--m-prop);opacity:0.85;}
+  .mascot .m-cloud path{fill:var(--m-cloud);}
+  .m-bob{animation:bob 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}
+  .m-eyes{animation:blink 5.5s infinite;transform-box:fill-box;transform-origin:center;}
+  .m-prop{animation:spin 0.35s linear infinite;transform-box:fill-box;transform-origin:center;}
+  .m-cloud-a{animation:drift 6s ease-in-out infinite;}
+  .m-cloud-b{animation:drift 7s ease-in-out infinite reverse;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-1.5deg);}50%{transform:translateY(-6px) rotate(1.5deg);}}
+  @keyframes blink{0%,90%,100%{transform:scaleY(1);}94%{transform:scaleY(0.1);}}
+  @keyframes spin{0%,100%{transform:scaleY(1);}50%{transform:scaleY(0.25);}}
+  @keyframes drift{0%,100%{transform:translateX(0);}50%{transform:translateX(7px);}}
+
+  /* ---------- workspace ---------- */
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;align-items:start;}
+  .panel{
+    background:var(--panel);border:2px solid var(--line);border-radius:22px;
+    padding:20px;box-shadow:0 5px 0 var(--pop);
+  }
+
+  .type-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin-bottom:22px;}
+  .type-btn{
+    display:flex;align-items:center;gap:10px;text-align:left;
+    padding:9px 12px;border:2px solid var(--line);border-radius:16px;
+    background:var(--field);color:var(--ink);
+    font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;
+    box-shadow:0 3px 0 var(--pop);transition:transform .12s ease,box-shadow .12s ease;
+  }
+  .type-btn:hover{transform:translateY(-1px);}
+  .type-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--pop);}
+  .type-btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .type-btn .ico{
+    flex:0 0 34px;height:34px;display:grid;place-items:center;
+    font-size:19px;background:var(--panel);border-radius:12px;
+  }
+  .type-btn .txt{min-width:0;display:block;}
+  .type-btn .th{display:block;line-height:1.3;}
+  .type-btn .ru{display:block;margin-top:2px;font-size:11.5px;font-weight:600;opacity:0.8;}
+  .type-btn.active{background:var(--blue);border-color:var(--blue);color:var(--on-blue);}
+
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  label{display:block;margin-bottom:6px;font-size:13px;font-weight:800;color:var(--ink-soft);}
+  select,input[type="text"],textarea{
+    width:100%;padding:11px 13px;border:2px solid var(--line);border-radius:14px;
+    background:var(--field);color:var(--ink);font-family:inherit;font-size:16px;
+  }
+  textarea{resize:vertical;min-height:120px;line-height:1.55;}
+  select:focus,input[type="text"]:focus,textarea:focus{outline:3px solid var(--blue);outline-offset:1px;border-color:var(--blue);}
+  .hint{margin:6px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-soft);}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .preset{background:var(--peach-bg);border:2px dashed var(--peach-line);border-radius:16px;padding:14px;}
+  .preset-info{
+    margin-top:8px;padding:8px 11px;border-radius:12px;background:var(--panel);
+    font-size:13px;font-weight:700;line-height:1.5;
+  }
+  .preset-info:empty{display:none;}
+
+  /* ---------- results ---------- */
+  .board{display:flex;flex-direction:column;gap:14px;min-width:0;}
+  .board-top{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:28px;}
+  .board-title{font-family:var(--font-display);font-weight:700;font-size:17px;}
+  .copy-msg{
+    padding:3px 12px;border-radius:999px;background:var(--tl-pill);color:var(--on-tl-pill);
+    font-size:12.5px;font-weight:800;
+  }
+  .copy-msg:empty{display:none;}
+  .res{border:2px solid;border-radius:20px;padding:14px 16px 16px;box-shadow:0 4px 0 var(--pop);min-width:0;}
+  .res-ru{background:var(--ru-bg);border-color:var(--ru-line);color:var(--ru-ink);}
+  .res-en{background:var(--en-bg);border-color:var(--en-line);color:var(--en-ink);}
+  .res-tl{background:var(--tl-bg);border-color:var(--tl-line);color:var(--tl-ink);}
+  .res-chips{background:var(--chip-bg);border-color:var(--chip-line);color:var(--chip-ink);}
+  .res-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+  .pill{padding:4px 12px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:0.05em;}
+  .pill-ru{background:var(--ru-pill);color:var(--on-ru-pill);}
+  .pill-en{background:var(--en-pill);color:var(--on-en-pill);}
+  .pill-tl{background:var(--tl-pill);color:var(--on-tl-pill);}
+  .pill-chip{background:var(--chip-pill);color:var(--on-chip-pill);}
+  .res-text{
+    white-space:pre-wrap;word-break:break-word;font-weight:700;
+    font-size:clamp(17px,2vw,20px);line-height:1.6;
+  }
+  .res-tl .res-text{font-size:15px;font-weight:600;font-style:italic;}
+  .res .hint{color:inherit;opacity:0.8;}
+  .voice-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px;}
+
+  .btn{
+    padding:8px 14px;border:2px solid var(--line);border-radius:999px;
+    background:var(--panel);color:var(--ink);
+    font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;
+    box-shadow:0 3px 0 var(--pop);transition:transform .12s ease,box-shadow .12s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--pop);}
+  .btn:focus-visible,.rate:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .btn-pink{background:var(--pink);border-color:var(--pink);color:var(--on-pink);}
+  .rate{
+    width:auto;padding:7px 12px;border:2px solid var(--line);border-radius:999px;
+    background:var(--panel);color:var(--ink);font-family:inherit;font-size:13px;font-weight:700;
+  }
+
+  .chips-row{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    display:flex;flex-direction:column;align-items:center;min-width:48px;
+    padding:6px 9px;border:2px solid var(--chip-line);border-radius:12px;
+    background:var(--panel);color:var(--chip-ink);
+  }
+  .chip .char{font-size:14px;font-weight:800;}
+  .chip .say{margin-top:2px;font-size:11px;font-weight:700;opacity:0.8;}
+
+  footer{margin-top:26px;color:var(--ink-soft);font-size:12.5px;line-height:1.6;}
+
+  @media (min-width:861px){
+    .board{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto;padding:2px 4px 6px 2px;}
+  }
+  @media (max-width:860px){
+    .grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:640px){
+    .buddy{order:-1;flex-direction:row-reverse;width:100%;justify-content:flex-start;gap:12px;}
+    .mascot{width:104px;flex:0 0 104px;}
+    .bubble{flex:1;width:auto;text-align:left;}
+    .bubble::after{
+      bottom:auto;left:-9px;top:50%;transform:translateY(-50%) rotate(45deg);
+      border-right:0;border-bottom:2px solid var(--line);border-left:2px solid var(--line);
+    }
+  }
+  @media (max-width:460px){
+    .two-col{grid-template-columns:1fr;}
+    .panel{padding:16px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .m-bob,.m-eyes,.m-prop,.m-cloud-a,.m-cloud-b{animation:none;}
+    .type-btn,.btn{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="top-text">
+      <p class="eyebrow">Gate Announcement · Объявления</p>
+      <h1>เครื่องมือสร้างประกาศภาษารัสเซีย</h1>
+      <p class="subtitle">เลือกประเภทประกาศ กรอกเที่ยวบิน ปลายทาง และเกท แล้วระบบจะสร้างข้อความภาษารัสเซียให้ พร้อมภาษาอังกฤษและคำอ่านโรมัน สำหรับเจ้าหน้าที่ที่ไม่ได้พูดภาษารัสเซีย</p>
+    </div>
+    <div class="buddy">
+      <p class="bubble" id="mascotSay" role="status" aria-live="polite">สวัสดี! เลือกประเภทประกาศแล้วกรอกข้อมูลได้เลยนะ</p>
+      <svg class="mascot" viewBox="0 0 190 140" role="img" aria-label="น้องบิน ตัวการ์ตูนเครื่องบินน้อยสวมหมวกบีนนี่">
+        <defs><clipPath id="mBodyClip"><ellipse cx="94" cy="72" rx="56" ry="32"/></clipPath></defs>
+        <g class="m-cloud m-cloud-a"><path d="M8 34 Q6 24 16 23 Q19 14 29 17 Q37 12 42 21 Q52 22 50 34 Z"/></g>
+        <g class="m-cloud m-cloud-b"><path d="M150 118 Q148 110 156 109 Q159 102 167 104 Q173 100 177 107 Q185 108 183 118 Z"/></g>
+        <g class="m-bob">
+          <path class="m-wing" d="M42 64 L24 36 Q21 31 27 31 L46 34 Q53 36 55 48 Z"/>
+          <path class="m-wing" d="M72 90 L52 118 Q49 124 57 124 L92 122 Q101 120 103 111 L106 94 Z"/>
+          <ellipse class="m-body" cx="94" cy="72" rx="56" ry="32"/>
+          <rect class="m-stripe" x="38" y="92" width="112" height="20" clip-path="url(#mBodyClip)"/>
+          <ellipse class="m-outline" cx="94" cy="72" rx="56" ry="32"/>
+          <path class="m-cap" d="M62 52 Q66 26 96 28 Q124 30 130 52 Q96 44 62 52 Z"/>
+          <path class="m-band" d="M60 50 Q96 41 132 50 L132 56 Q96 47 60 56 Z"/>
+          <circle class="m-pom" cx="96" cy="24" r="7"/>
+          <g class="m-eyes">
+            <ellipse class="m-eye" cx="80" cy="70" rx="5.5" ry="7"/>
+            <ellipse class="m-eye" cx="110" cy="70" rx="5.5" ry="7"/>
+            <circle class="m-spark" cx="82" cy="67" r="1.9"/>
+            <circle class="m-spark" cx="112" cy="67" r="1.9"/>
+          </g>
+          <ellipse class="m-cheek" cx="68" cy="82" rx="7" ry="4.5"/>
+          <ellipse class="m-cheek" cx="122" cy="82" rx="7" ry="4.5"/>
+          <path class="m-mouth" d="M88 82 Q95 90 102 82"/>
+          <circle class="m-nose" cx="152" cy="72" r="5.5"/>
+          <g class="m-prop"><ellipse cx="157" cy="72" rx="3.4" ry="18"/></g>
+        </g>
+      </svg>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- FORM -->
+    <div class="panel">
+
+      <div class="type-list" id="typeList"></div>
+
+      <div class="field">
+        <label for="airline">สายการบิน / Авиакомпания</label>
+        <select id="airline"></select>
+      </div>
+
+      <div class="field preset hidden" id="aeroflotPresetWrap">
+        <label for="aeroflotPreset">✈️ เที่ยวบิน Aeroflot ขาออกจากภูเก็ต (HKT) — เลือกแล้วใส่ปลายทางให้อัตโนมัติ</label>
+        <select id="aeroflotPreset"></select>
+        <div class="preset-info" id="aeroflotInfo"></div>
+        <p class="hint">เวลาออกจากภูเก็ตเป็นข้อมูลอ้างอิงจากเว็บ FlightsFrom (บางเที่ยวเป็นตารางของสัปดาห์ที่ระบุไว้ ไม่ใช่ตารางล่าสุด) ตารางบินเปลี่ยนตามฤดูกาล กรุณาตรวจสอบกับ Aeroflot หรือฝ่ายปฏิบัติการก่อนใช้ประกาศจริง</p>
+      </div>
+      <div class="field hidden" id="airlineCustomWrap">
+        <div class="two-col">
+          <div>
+            <label>ชื่อสายการบิน (รัสเซีย)</label>
+            <input type="text" id="airlineCustomRu" placeholder="напр. Победа">
+          </div>
+          <div>
+            <label>คำอ่าน (โรมัน)</label>
+            <input type="text" id="airlineCustomTl" placeholder="e.g. Pobeda">
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <label>ชื่อสายการบิน (อังกฤษ)</label>
+          <input type="text" id="airlineCustomEn" placeholder="e.g. Pobeda Airlines">
+        </div>
+      </div>
+
+      <div class="field" id="flightWrap">
+        <label for="flight">เลขที่เที่ยวบิน / Номер рейса</label>
+        <input type="text" id="flight" placeholder="เช่น SU637" value="SU637">
+        <p class="hint">พิมพ์รหัสสายการบิน+เลขเที่ยวบินติดกัน ระบบจะแยกตัวอักษร/ตัวเลขให้อ่านทีละตัวด้านล่างบอร์ด</p>
+      </div>
+
+      <div class="field" id="destWrap">
+        <label for="dest">ปลายทาง / Направление</label>
+        <select id="dest"></select>
+      </div>
+      <div class="field hidden" id="destCustomWrap">
+        <label>ปลายทาง (รัสเซีย, การกที่ใช้หลัง "до" เช่น Москвы)</label>
+        <input type="text" id="destCustomRu" placeholder="напр. Сочи">
+        <div class="two-col" style="margin-top:8px;">
+          <div>
+            <label>คำอ่าน (โรมัน)</label>
+            <input type="text" id="destCustomTl" placeholder="e.g. Sochi">
+          </div>
+          <div>
+            <label>ปลายทาง (อังกฤษ)</label>
+            <input type="text" id="destCustomEn" placeholder="e.g. Sochi">
+          </div>
+        </div>
+      </div>
+
+      <div class="field" id="gateWrap">
+        <label for="gate">หมายเลขเกท / Номер выхода</label>
+        <input type="text" id="gate" placeholder="เช่น 11" value="11">
+      </div>
+
+      <div class="field hidden" id="minutesWrap">
+        <label for="minutes">ปิดประตูอีกกี่นาที / Через сколько минут</label>
+        <input type="text" id="minutes" inputmode="numeric" placeholder="เช่น 5" value="5">
+      </div>
+
+      <div class="field hidden" id="gateOldNewWrap">
+        <label>เปลี่ยนเกทจาก → เป็น / Гейт изменён с … на …</label>
+        <div class="two-col">
+          <input type="text" id="gateOld" placeholder="เกทเดิม เช่น 12">
+          <input type="text" id="gateNew" placeholder="เกทใหม่ เช่น 11">
+        </div>
+      </div>
+
+      <div class="field hidden" id="nameWrap">
+        <label for="pname">ชื่อผู้โดยสาร (ตามหน้าตั๋ว/พาสปอร์ต)</label>
+        <textarea id="pname" rows="5" placeholder="พิมพ์ชื่อผู้โดยสาร ชื่อละบรรทัด">BUNYAPONG INTHAWONG
+KETSIREE
+SALINSIRA</textarea>
+        <p class="hint">ใส่ได้หลายคน พิมพ์ชื่อละบรรทัด (กด Enter ขึ้นบรรทัดใหม่) หรือคั่นด้วยจุลภาคก็ได้ ระบบจะผันไวยากรณ์เป็นพหูพจน์ให้อัตโนมัติ และใส่ชื่อตามที่พิมพ์ ไม่แปลงเป็นอักษรซีริลลิก (เหมือนที่สนามบินประกาศจริง)</p>
+      </div>
+
+      <div class="field hidden" id="reasonWrap">
+        <label for="reason">สาเหตุความล่าช้า / Причина задержки</label>
+        <select id="reason"></select>
+        <div class="hidden" id="reasonCustomWrap" style="margin-top:8px;">
+          <div class="two-col">
+            <div>
+              <label>เหตุผล (รัสเซีย, การก genitive หลัง "по причине")</label>
+              <input type="text" id="reasonCustomRu" placeholder="напр. отсутствия экипажа">
+            </div>
+            <div>
+              <label>คำอ่าน (โรมัน)</label>
+              <input type="text" id="reasonCustomTl" placeholder="e.g. otsutstviya ekipazha">
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <label>เหตุผล (อังกฤษ)</label>
+            <input type="text" id="reasonCustomEn" placeholder="e.g. crew unavailability">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="board">
+      <div class="board-top">
+        <span class="board-title">🎫 ข้อความประกาศ</span>
+        <span class="copy-msg" id="copyMsg" role="status"></span>
+      </div>
+
+      <section class="res res-ru" aria-label="ข้อความภาษารัสเซีย">
+        <div class="res-head">
+          <span class="pill pill-ru">RU · ภาษารัสเซีย</span>
+          <button class="btn" id="copyRu" type="button">คัดลอก</button>
+        </div>
+        <div class="res-text" id="outRu"></div>
+        <div class="voice-row">
+          <select id="speechRate" class="rate" aria-label="ความเร็วเสียงพูด">
+            <option value="0.75">ช้า</option>
+            <option value="0.9" selected>ปกติ</option>
+            <option value="1.1">เร็ว</option>
+          </select>
+          <button class="btn btn-pink" id="speakRu" type="button">🔊 พูดประกาศ</button>
+          <button class="btn" id="stopSpeak" type="button">⏹ หยุด</button>
+        </div>
+        <p class="hint" id="voiceHint"></p>
+      </section>
+
+      <section class="res res-en" aria-label="ข้อความภาษาอังกฤษ">
+        <div class="res-head">
+          <span class="pill pill-en">EN · ภาษาอังกฤษ</span>
+          <button class="btn" id="copyEn" type="button">คัดลอก</button>
+        </div>
+        <div class="res-text" id="outEn"></div>
+      </section>
+
+      <section class="res res-tl" aria-label="คำอ่านโรมัน">
+        <div class="res-head">
+          <span class="pill pill-tl">คำอ่านโรมัน · ช่วยอ่านออกเสียง</span>
+          <button class="btn" id="copyTl" type="button">คัดลอก</button>
+        </div>
+        <div class="res-text" id="outTl"></div>
+      </section>
+
+      <section class="res res-chips" id="chipsSection" aria-label="เลขเที่ยวบินอ่านทีละตัว">
+        <div class="res-head">
+          <span class="pill pill-chip">เลขเที่ยวบิน อ่านทีละตัว · Побуквенно</span>
+        </div>
+        <div class="chips-row" id="chips"></div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    หมายเหตุ: คำแปล/การผันคำในภาษารัสเซียเป็นแบบมาตรฐานสำหรับประกาศสนามบินทั่วไป หากเลือก "อื่นๆ" กรุณาตรวจสอบรูปแบบไวยากรณ์กับเจ้าหน้าที่ที่พูดภาษารัสเซียก่อนใช้จริงหากเป็นไปได้
+  </footer>
+
+</div>
+
+<script>
+// ---------- Data ----------
+const AIRLINES = [
+  {id:'aeroflot', rus:true, ru:'Аэрофлот', tl:'Aeroflot'},
+  {id:'s7', rus:true, ru:'С7 Эйрлайнс', tl:'S7 Airlines'},
+  {id:'rossiya', rus:true, ru:'Россия', tl:'Rossiya Airlines'},
+  {id:'ural', rus:true, ru:'Уральские авиалинии', tl:'Ural Airlines'},
+  {id:'nordwind', rus:true, ru:'Nordwind Airlines', tl:'Nordwind Airlines'},
+  {id:'azur', rus:true, ru:'Азур Эйр', tl:'Azur Air'},
+  {id:'ikar', rus:true, ru:'Икар', tl:'Ikar (Pegas Fly)'},
+  {id:'yakutia', rus:true, ru:'Якутия', tl:'Yakutiya Airlines'},
+  {id:'pobeda', rus:true, ru:'Победа', tl:'Pobeda'},
+  {id:'utair', rus:true, ru:'ЮТэйр', tl:'UTair'},
+  {id:'mahan', ru:'Махан Эйр', tl:'Mahan Air'},
+  {id:'edelweiss', ru:'Эдельвейс Эйр', tl:'Edelweiss Air'},
+  {id:'swiss', ru:'Свисс', tl:'Swiss International Air Lines'},
+  {id:'thai', ru:'Thai Airways', tl:'Thai Airways'},
+  {id:'other', custom:true, label:'อื่นๆ (พิมพ์เอง) / Другая'}
+];
+
+const DESTINATIONS = [
+  {id:'moscow', nom:'Москва', gen:'Москвы', gtl:'Moskvy', en:'Moscow', label:'Москва / Moscow'},
+  {id:'spb', nom:'Санкт-Петербург', gen:'Санкт-Петербурга', gtl:'Sankt-Peterburga', en:'Saint Petersburg', label:'Санкт-Петербург / St. Petersburg'},
+  {id:'novosibirsk', nom:'Новосибирск', gen:'Новосибирска', gtl:'Novosibirska', en:'Novosibirsk', label:'Новосибирск / Novosibirsk'},
+  {id:'yekaterinburg', nom:'Екатеринбург', gen:'Екатеринбурга', gtl:'Yekaterinburga', en:'Yekaterinburg', label:'Екатеринбург / Yekaterinburg'},
+  {id:'vladivostok', nom:'Владивосток', gen:'Владивостока', gtl:'Vladivostoka', en:'Vladivostok', label:'Владивосток / Vladivostok'},
+  {id:'khabarovsk', nom:'Хабаровск', gen:'Хабаровска', gtl:'Khabarovska', en:'Khabarovsk', label:'Хабаровск / Khabarovsk'},
+  {id:'krasnoyarsk', nom:'Красноярск', gen:'Красноярска', gtl:'Krasnoyarska', en:'Krasnoyarsk', label:'Красноярск / Krasnoyarsk'},
+  {id:'irkutsk', nom:'Иркутск', gen:'Иркутска', gtl:'Irkutska', en:'Irkutsk', label:'Иркутск / Irkutsk'},
+  {id:'kazan', nom:'Казань', gen:'Казани', gtl:'Kazani', en:'Kazan', label:'Казань / Kazan'},
+  {id:'ufa', nom:'Уфа', gen:'Уфы', gtl:'Ufy', en:'Ufa', label:'Уфа / Ufa'},
+  {id:'tyumen', nom:'Тюмень', gen:'Тюмени', gtl:'Tyumeni', en:'Tyumen', label:'Тюмень / Tyumen'},
+  {id:'krasnodar', nom:'Краснодар', gen:'Краснодара', gtl:'Krasnodara', en:'Krasnodar', label:'Краснодар / Krasnodar'},
+  {id:'rostov', nom:'Ростов-на-Дону', gen:'Ростова-на-Дону', gtl:'Rostova-na-Donu', en:'Rostov-on-Don', label:'Ростов-на-Дону / Rostov-on-Don'},
+  {id:'chelyabinsk', nom:'Челябинск', gen:'Челябинска', gtl:'Chelyabinska', en:'Chelyabinsk', label:'Челябинск / Chelyabinsk'},
+  {id:'samara', nom:'Самара', gen:'Самары', gtl:'Samary', en:'Samara', label:'Самара / Samara'},
+  {id:'perm', nom:'Пермь', gen:'Перми', gtl:'Permi', en:'Perm', label:'Пермь / Perm'},
+  {id:'novokuznetsk', nom:'Новокузнецк', gen:'Новокузнецка', gtl:'Novokuznetska', en:'Novokuznetsk', label:'Новокузнецк / Novokuznetsk'},
+  {id:'omsk', nom:'Омск', gen:'Омска', gtl:'Omska', en:'Omsk', label:'Омск / Omsk'},
+  {id:'tehran', nom:'Тегеран', gen:'Тегерана', gtl:'Tegerana', en:'Tehran', label:'Тегеран / Tehran'},
+  {id:'zurich', nom:'Цюрих', gen:'Цюриха', gtl:'Tsyurikha', en:'Zurich', label:'Цюрих / Zurich'},
+  {id:'other', custom:true, label:'อื่นๆ (พิมพ์เอง) / Другое'}
+];
+
+const REASONS = [
+  {id:'weather', ru:'погодных условий', tl:'pogodnykh usloviy', en:'weather conditions', label:'สภาพอากาศ / Weather'},
+  {id:'technical', ru:'технических причин', tl:'tekhnicheskikh prichin', en:'technical reasons', label:'ปัญหาทางเทคนิค / Technical'},
+  {id:'late_aircraft', ru:'позднего прибытия воздушного судна', tl:'pozdnego pribytiya vozdushnogo sudna', en:'the late arrival of the aircraft', label:'เครื่องมาถึงล่าช้า / Late aircraft'},
+  {id:'other', custom:true, label:'อื่นๆ (พิมพ์เอง) / Другая'}
+];
+
+const TYPES = [
+  {id:'bir', th:'เรียกผู้โดยสารเรื่องสัมภาระ', ru:'BIR — вызов по багажу', fields:['airline','flight','dest','gate','name']},
+  {id:'preboard', th:'เชิญขึ้นเครื่องล่วงหน้า (Pre-boarding)', ru:'Предварительная посадка', fields:['airline','flight','dest','gate']},
+  {id:'boarding', th:'เชิญขึ้นเครื่อง (Boarding)', ru:'Объявляется посадка', fields:['airline','flight','dest','gate']},
+  {id:'boardingcont', th:'เชิญขึ้นเครื่องต่อเนื่อง (Boarding continuing)', ru:'Продолжается посадка', fields:['airline','flight','dest','gate']},
+  {id:'finalcall', th:'เรียกครั้งสุดท้าย (Final boarding)', ru:'Последний вызов', fields:['airline','flight','dest','gate','minutes']},
+  {id:'finalcallname', th:'เรียกครั้งสุดท้าย + ชื่อผู้โดยสาร (Final boarding with names)', ru:'Последний вызов по фамилии', fields:['airline','flight','dest','gate','minutes','name']},
+  {id:'gateclosing', th:'ปิดประตูขึ้นเครื่อง (Gate closing)', ru:'Посадка завершена', fields:['airline','flight','dest']},
+  {id:'gatechange', th:'เปลี่ยนประตูขึ้นเครื่อง', ru:'Изменение выхода', fields:['airline','flight','dest','gateOldNew']},
+  {id:'delay', th:'ประกาศเที่ยวบินล่าช้า', ru:'Задержка рейса', fields:['airline','flight','dest','reason']},
+  {id:'refresh', th:'แจกน้ำ/อาหาร (ระหว่างล่าช้า)', ru:'Напитки и закуски', fields:['airline','flight','dest','gate']},
+  {id:'paging', th:'เรียกผู้โดยสารทั่วไป', ru:'Общий вызов пассажира', fields:['airline','flight','dest','gate','name']}
+];
+
+const LETTERS = {
+  A:['Эй','ey'],B:['Би','bi'],C:['Си','si'],D:['Ди','di'],E:['И','i'],F:['Эф','ef'],
+  G:['Джи','dzhi'],H:['Эйч',"eych"],I:['Ай','ay'],J:['Джей','dzhey'],K:['Кей','key'],
+  L:['Эль','el'],M:['Эм','em'],N:['Эн','en'],O:['О','o'],P:['Пи','pi'],Q:['Кью','kyu'],
+  R:['Эр','er'],S:['Эс','es'],T:['Ти','ti'],U:['Ю','yu'],V:['Ви','vi'],W:['Дабл-ю','dabl-yu'],
+  X:['Икс','iks'],Y:['Уай','uay'],Z:['Зед','zed']
+};
+const DIGITS = {
+  '0':['ноль',"nol'"],'1':['один','odin'],'2':['два','dva'],'3':['три','tri'],
+  '4':['четыре','chetyre'],'5':['пять',"pyat'"],'6':['шесть',"shest'"],
+  '7':['семь',"sem'"],'8':['восемь',"vosem'"],'9':['девять',"devyat'"]
+};
+
+// ---------- State ----------
+let currentType = 'bir';
+
+// ---------- Populate selects ----------
+function fillSelect(sel, list){
+  sel.innerHTML = '';
+  list.forEach(item=>{
+    const opt = document.createElement('option');
+    opt.value = item.id;
+    opt.textContent = item.custom ? item.label : (item.label || (item.ru + ' / ' + item.tl));
+    sel.appendChild(opt);
+  });
+}
+fillSelect(document.getElementById('airline'), AIRLINES);
+fillSelect(document.getElementById('dest'), DESTINATIONS);
+fillSelect(document.getElementById('reason'), REASONS);
+
+// ---------- Mascot + type icons ----------
+const TYPE_ICONS = {
+  bir:'🧳', preboard:'👶', boarding:'🛫', boardingcont:'🚶', finalcall:'⏰',
+  finalcallname:'📣', gateclosing:'🚪', gatechange:'🔀', delay:'⏳', refresh:'🥤', paging:'🔔'
+};
+const MASCOT_SAY = {
+  bir:'มีผู้โดยสารต้องติดต่อเรื่องสัมภาระน้า',
+  preboard:'เชิญผู้โดยสารกลุ่มพิเศษขึ้นก่อนนะ',
+  boarding:'ได้เวลาขึ้นเครื่องแล้ว!',
+  boardingcont:'ใครยังไม่ขึ้น เร็วๆ เลยน้า',
+  finalcall:'เรียกครั้งสุดท้ายแล้วนะ รีบๆ!',
+  finalcallname:'เรียกชื่อรอบสุดท้าย ใส่ได้หลายชื่อเลย',
+  gateclosing:'ปิดประตูแล้ว เดินทางปลอดภัยนะ',
+  gatechange:'เปลี่ยนเกทแล้ว ใส่เกทเก่าและใหม่ให้ครบน้า',
+  delay:'เที่ยวบินล่าช้า เลือกสาเหตุให้หน่อยนะ',
+  refresh:'แจกน้ำแจกขนมให้ผู้โดยสารจ้า',
+  paging:'เรียกชื่อผู้โดยสาร ใส่ได้หลายชื่อเลย'
+};
+let mascotTimer = null;
+function setMascot(msg, temporary){
+  const el = document.getElementById('mascotSay');
+  if(!el) return;
+  el.textContent = msg;
+  clearTimeout(mascotTimer);
+  if(temporary){
+    mascotTimer = setTimeout(setMascotForType, 2400);
+  }
+}
+function setMascotForType(){
+  const el = document.getElementById('mascotSay');
+  if(!el) return;
+  el.textContent = MASCOT_SAY[currentType] || 'เลือกประเภทประกาศได้เลยนะ';
+}
+
+// ---------- Type buttons ----------
+const typeListEl = document.getElementById('typeList');
+TYPES.forEach(t=>{
+  const btn = document.createElement('button');
+  btn.className = 'type-btn' + (t.id===currentType ? ' active' : '');
+  btn.dataset.id = t.id;
+  btn.innerHTML = '<span class="ico" aria-hidden="true">'+(TYPE_ICONS[t.id]||'✈️')+'</span><span class="txt"><span class="th">'+t.th+'</span><span class="ru">'+t.ru+'</span></span>';
+  btn.addEventListener('click', ()=>{
+    currentType = t.id;
+    setMascotForType();
+    document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    updateFieldVisibility();
+    render();
+  });
+  typeListEl.appendChild(btn);
+});
+
+function updateFieldVisibility(){
+  const t = TYPES.find(x=>x.id===currentType);
+  const has = k => t.fields.includes(k);
+  document.getElementById('flightWrap').classList.toggle('hidden', !has('flight'));
+  document.getElementById('destWrap').classList.toggle('hidden', !has('dest'));
+  document.getElementById('gateWrap').classList.toggle('hidden', !has('gate'));
+  document.getElementById('gateOldNewWrap').classList.toggle('hidden', !has('gateOldNew'));
+  document.getElementById('nameWrap').classList.toggle('hidden', !has('name'));
+  document.getElementById('reasonWrap').classList.toggle('hidden', !has('reason'));
+  document.getElementById('minutesWrap').classList.toggle('hidden', !has('minutes'));
+}
+
+// ---------- Custom field toggles ----------
+document.getElementById('airline').addEventListener('change', function(){
+  document.getElementById('airlineCustomWrap').classList.toggle('hidden', this.value !== 'other');
+  document.getElementById('aeroflotPresetWrap').classList.toggle('hidden', this.value !== 'aeroflot');
+  if(this.value !== 'aeroflot'){
+    document.getElementById('aeroflotPreset').value = 'custom';
+    showAeroflotInfo('custom');
+  }
+  render();
+});
+const AEROFLOT_HKT = [
+  {n:'SU275', d:'moscow',        s:null},
+  {n:'SU277', d:'moscow',        s:'จ. 15:15 · พ. 15:15 · พฤ. 15:35 · ส. 15:35 · อา. 14:20', w:'19–25 ต.ค.', h:'10 ชม. 15 นาที'},
+  {n:'SU279', d:'moscow',        s:null},
+  {n:'SU285', d:'moscow',        s:'ทุกวัน 10:35 (อา. 10:40)', w:'19–25 ต.ค.', h:'10 ชม. 15 นาที'},
+  {n:'SU627', d:'yekaterinburg', s:'จ. 12:45 · ศ. 11:55', w:'31 ส.ค.–6 ก.ย.', h:'9 ชม. 50 นาที'},
+  {n:'SU629', d:'spb',           s:'อ. 11:45 · พฤ. 13:25 · ส. 11:45', w:'19–25 ต.ค.', h:'11 ชม. 25 นาที'},
+  {n:'SU635', d:'krasnoyarsk',   s:'จ. 13:25 · พฤ. 14:00', w:'31 ส.ค.–6 ก.ย.', h:'8 ชม.'},
+  {n:'SU637', d:'novosibirsk',   s:'อ. 09:25 · ศ. 18:45', w:'12–18 ต.ค.', h:'10 ชม. 30 นาที'},
+  {n:'SU639', d:'vladivostok',   s:'อ. 17:05', w:'19–25 ต.ค.', h:'7 ชม. 25 นาที'},
+  {n:'SU642', d:'khabarovsk',    s:'พ. 17:55 · อา. 15:15', w:'31 ส.ค.–6 ก.ย.', h:'7 ชม. 50 นาที'},
+  {n:'SU661', d:'irkutsk',       s:'พ. 12:00 · อา. 10:55', w:'24–30 ส.ค.', h:'7 ชม.'}
+];
+const DEST_TH = {
+  moscow:'มอสโก', spb:'เซนต์ปีเตอร์สเบิร์ก', yekaterinburg:'เยคาเตรินเบิร์ก',
+  krasnoyarsk:'ครัสโนยาสค์', novosibirsk:'โนโวซีบีสค์', vladivostok:'วลาดีวอสตอค',
+  khabarovsk:'คาบารอฟสค์', irkutsk:'อีร์คุตสค์'
+};
+(function buildAeroflotPreset(){
+  const sel = document.getElementById('aeroflotPreset');
+  const first = document.createElement('option');
+  first.value = 'custom'; first.textContent = '— เลือกเที่ยวบิน —';
+  sel.appendChild(first);
+  AEROFLOT_HKT.forEach(f=>{
+    const o = document.createElement('option');
+    o.value = f.n;
+    o.textContent = f.n + ' → ' + DEST_TH[f.d];
+    sel.appendChild(o);
+  });
+})();
+function showAeroflotInfo(code){
+  const box = document.getElementById('aeroflotInfo');
+  const f = AEROFLOT_HKT.find(x=>x.n===code);
+  if(!f){ box.textContent = ''; return; }
+  if(!f.s){
+    box.textContent = 'ไม่พบเวลาบินของ ' + f.n + ' ในหน้าเว็บที่ตรวจ (ตรวจสอบเวลากับฝ่ายปฏิบัติการ)';
+    return;
+  }
+  box.textContent = 'เวลาออกจากภูเก็ต: ' + f.s + '  ·  ตารางสัปดาห์ ' + f.w + '  ·  บิน ' + f.h;
+}
+document.getElementById('aeroflotPreset').addEventListener('change', function(){
+  const f = AEROFLOT_HKT.find(x=>x.n===this.value);
+  if(f){
+    document.getElementById('flight').value = f.n;
+    document.getElementById('dest').value = f.d;
+    document.getElementById('destCustomWrap').classList.add('hidden');
+  }
+  showAeroflotInfo(this.value);
+  render();
+});
+document.getElementById('dest').addEventListener('change', function(){
+  document.getElementById('destCustomWrap').classList.toggle('hidden', this.value !== 'other');
+  render();
+});
+document.getElementById('reason').addEventListener('change', function(){
+  document.getElementById('reasonCustomWrap').classList.toggle('hidden', this.value !== 'other');
+  render();
+});
+
+['flight','gate','minutes','gateOld','gateNew','pname','airlineCustomRu','airlineCustomTl','airlineCustomEn',
+ 'destCustomRu','destCustomTl','destCustomEn','reasonCustomRu','reasonCustomTl','reasonCustomEn'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', render);
+});
+
+// ---------- Helpers ----------
+function getAirline(){
+  const sel = document.getElementById('airline').value;
+  if(sel === 'other'){
+    return {
+      ru: document.getElementById('airlineCustomRu').value || '—',
+      tl: document.getElementById('airlineCustomTl').value || '—',
+      en: document.getElementById('airlineCustomEn').value || document.getElementById('airlineCustomTl').value || '—'
+    };
+  }
+  const a = AIRLINES.find(x=>x.id===sel);
+  return {ru:a.ru, tl:a.tl, en:a.tl, rus:!!a.rus};
+}
+function getDest(){
+  const sel = document.getElementById('dest').value;
+  if(sel === 'other'){
+    return {
+      gen: document.getElementById('destCustomRu').value || '—',
+      gtl: document.getElementById('destCustomTl').value || '—',
+      en: document.getElementById('destCustomEn').value || document.getElementById('destCustomTl').value || '—'
+    };
+  }
+  const d = DESTINATIONS.find(x=>x.id===sel);
+  return {gen:d.gen, gtl:d.gtl, en:d.en};
+}
+function getReason(){
+  const sel = document.getElementById('reason').value;
+  if(sel === 'other'){
+    return {
+      ru: document.getElementById('reasonCustomRu').value || '—',
+      tl: document.getElementById('reasonCustomTl').value || '—',
+      en: document.getElementById('reasonCustomEn').value || '—'
+    };
+  }
+  const r = REASONS.find(x=>x.id===sel);
+  return {ru:r.ru, tl:r.tl, en:r.en};
+}
+function cleanFlight(v){
+  return (v||'').toUpperCase().replace(/[\s\-]+/g,'');
+}
+function getNames(){
+  const raw = document.getElementById('pname').value || '';
+  const names = raw.split(/[,\n;]+/).map(s=>s.trim().toUpperCase()).filter(s=>s.length>0);
+  return names.length ? names : ['—'];
+}
+function passengerGrammar(count){
+  if(count > 1){
+    return {
+      ru_word: 'Пассажиров', tl_word: 'Passazhirov',
+      ru_part: 'вылетающих', tl_part: 'vyletayushchikh'
+    };
+  }
+  return {
+    ru_word: 'Пассажира', tl_word: 'Passazhira',
+    ru_part: 'вылетающего', tl_part: 'vyletayushchego'
+  };
+}
+
+// ---------- Template builder ----------
+function minutesForms(raw){
+  const n = parseInt((raw||'').trim(), 10);
+  if(isNaN(n) || n < 0){ return {n:'—', ru:'минут', tl:'minut', en:'minutes'}; }
+  const m100 = n % 100, m10 = n % 10;
+  if(m100 >= 11 && m100 <= 14) return {n, ru:'минут', tl:'minut', en:'minutes'};
+  if(m10 === 1) return {n, ru:'минуту', tl:'minutu', en: n === 1 ? 'minute' : 'minutes'};
+  if(m10 >= 2 && m10 <= 4) return {n, ru:'минуты', tl:'minuty', en:'minutes'};
+  return {n, ru:'минут', tl:'minut', en:'minutes'};
+}
+
+function buildAnnouncement(){
+  const airline = getAirline();
+  const dest = getDest();
+  const flight = cleanFlight(document.getElementById('flight').value) || '—';
+  const gate = document.getElementById('gate').value || '—';
+  const gateOld = document.getElementById('gateOld').value || '—';
+  const gateNew = document.getElementById('gateNew').value || '—';
+  const names = getNames();
+  const nameJoined = names.join(', ');
+  const gram = passengerGrammar(names.length);
+  const enPax = names.length > 1 ? 'passengers' : 'passenger';
+  const reason = getReason();
+  const airRu = (airline.rus ? 'Российской авиакомпании' : 'авиакомпании') + ' “' + airline.ru + '”';
+  const airTl = (airline.rus ? 'Rossiyskoy aviakompanii' : 'aviakompanii') + ' “' + airline.tl + '”';
+  const mins = minutesForms(document.getElementById('minutes').value);
+
+  let ru = '', tl = '', en = '';
+
+  switch(currentType){
+    case 'bir':
+      ru = `Уважаемые пассажиры, внимание! ${gram.ru_word} ${nameJoined}, ${gram.ru_part} рейсом ${airline.ru} ${flight} до ${dest.gen}, просим подойти к сотруднику у выхода на посадку номер ${gate} по вопросу багажа. Благодарим за внимание.`;
+      tl = `Uvazhayemyye passazhiry, vnimaniye! ${gram.tl_word} ${nameJoined}, ${gram.tl_part} reysom ${airline.tl} ${flight} do ${dest.gtl}, prosim podoyti k sotrudniku u vykhoda na posadku nomer ${gate} po voprosu bagazha. Blagodarim za vnimaniye.`;
+      en = `Ladies and gentlemen, may I have your attention please. Would ${enPax} ${nameJoined}, travelling on ${airline.en} flight ${flight} to ${dest.en}, please contact our ground staff at gate ${gate} regarding your baggage. Thank you.`;
+      break;
+    case 'preboard':
+      ru = `Уважаемые пассажиры!\nПосадка на рейс ${flight} ${airRu} до ${dest.gen} начнётся через несколько минут. Пассажиры с приоритетной посадкой, нуждающиеся в дополнительной помощи, и пассажиры с детьми приглашаются на предварительную посадку.\nПросим пассажиров пройти к выходу на посадку номер ${gate} и\nПожалуйста, приготовьте посадочный талон и документ, удостоверяющий личность. Спасибо за внимание. Желаем вам приятного полёта!`;
+      tl = `Uvazhayemyye passazhiry!\nPosadka na reys ${flight} ${airTl} do ${dest.gtl} nachnyotsya cherez neskol'ko minut. Passazhiry s prioritetnoy posadkoy, nuzhdayushchiyesya v dopolnitel'noy pomoshchi, i passazhiry s det'mi priglashayutsya na predvaritel'nuyu posadku.\nProsim passazhirov proyti k vykhodu na posadku nomer ${gate} i\nPozhaluysta, prigotov'te posadochnyy talon i dokument, udostoveryayushchiy lichnost'. Spasibo za vnimaniye. Zhelayem vam priyatnogo polyota!`;
+      en = `Ladies and gentlemen, boarding for ${airline.en} flight ${flight} to ${dest.en} will begin in a few minutes. Passengers with priority boarding, passengers requiring special assistance, and passengers travelling with children are invited to board now. Would passengers please proceed to boarding gate ${gate}. Please have your boarding pass and identification ready. Thank you for your attention. We wish you a pleasant flight!`;
+      break;
+    case 'boarding':
+      ru = `Уважаемые пассажиры!\nОбъявляется посадка на рейс ${airRu} ${flight} до ${dest.gen}.\nПросим пассажиров пройти к выходу на посадку номер ${gate} и\nПожалуйста, приготовьте посадочный талон и документ, удостоверяющий личность. Спасибо за внимание.`;
+      tl = `Uvazhayemyye passazhiry!\nObyavlyayetsya posadka na reys ${airTl} ${flight} do ${dest.gtl}.\nProsim passazhirov proyti k vykhodu na posadku nomer ${gate} i\nPozhaluysta, prigotov'te posadochnyy talon i dokument, udostoveryayushchiy lichnost'. Spasibo za vnimaniye.`;
+      en = `Ladies and gentlemen, boarding has begun for ${airline.en} flight ${flight} to ${dest.en}. Would passengers please proceed to boarding gate ${gate}. Please have your boarding pass and identification ready. Thank you for your attention.`;
+      break;
+    case 'boardingcont':
+      ru = `Уважаемые пассажиры!\nПродолжается посадка на рейс ${airRu} ${flight} до ${dest.gen}. Просим пассажиров, которые ещё не прошли на посадку, пройти к выходу номер ${gate}.`;
+      tl = `Uvazhayemyye passazhiry!\nProdolzhayetsya posadka na reys ${airTl} ${flight} do ${dest.gtl}. Prosim passazhirov, kotoryye yeshchyo ne proshli na posadku, proyti k vykhodu nomer ${gate}.`;
+      en = `Ladies and gentlemen, boarding is continuing for ${airline.en} flight ${flight} to ${dest.en}. Passengers who have not yet boarded, please proceed to gate ${gate}.`;
+      break;
+    case 'finalcall':
+      ru = `Внимание! Последний вызов для пассажиров рейса ${airRu} ${flight} до ${dest.gen}.. Пассажиры, которые ещё не прошли на посадку, просим незамедлительно пройти к выходу номер ${gate}. Посадка на рейс завершается через ${mins.n} ${mins.ru}.`;
+      tl = `Vnimaniye! Posledniy vyzov dlya passazhirov reysa ${airTl} ${flight} do ${dest.gtl}.. Passazhiry, kotoryye yeshchyo ne proshli na posadku, prosim nezamedlitel'no proyti k vykhodu nomer ${gate}. Posadka na reys zavershayetsya cherez ${mins.n} ${mins.tl}.`;
+      en = `Attention please. This is the final call for passengers of ${airline.en} flight ${flight} to ${dest.en}. Passengers who have not yet boarded, please proceed immediately to gate ${gate}. Boarding will be completed in ${mins.n} ${mins.en}.`;
+      break;
+    case 'finalcallname':
+      ru = `Внимание! Последний вызов для ${gram.ru_word.toLowerCase()} ${nameJoined}, ${gram.ru_part} рейсом ${airRu} ${flight} до ${dest.gen}.\nПросим вас незамедлительно пройти к выходу номер ${gate}. Посадка на рейс завершается через ${mins.n} ${mins.ru}.`;
+      tl = `Vnimaniye! Posledniy vyzov dlya ${gram.tl_word.toLowerCase()} ${nameJoined}, ${gram.tl_part} reysom ${airTl} ${flight} do ${dest.gtl}.\nProsim vas nezamedlitel'no proyti k vykhodu nomer ${gate}. Posadka na reys zavershayetsya cherez ${mins.n} ${mins.tl}.`;
+      en = `Attention please. This is the final call for ${enPax} ${nameJoined}, travelling on ${airline.en} flight ${flight} to ${dest.en}. Please proceed immediately to gate ${gate}. Boarding will be completed in ${mins.n} ${mins.en}.`;
+      break;
+    case 'gateclosing':
+      ru = `Уважаемые пассажиры! Посадка на рейс ${airRu} ${flight} до ${dest.gen} завершена. Спасибо за внимание. Желаем вам приятного полёта!`;
+      tl = `Uvazhayemyye passazhiry! Posadka na reys ${airTl} ${flight} do ${dest.gtl} zavershena. Spasibo za vnimaniye. Zhelayem vam priyatnogo polyota!`;
+      en = `Ladies and gentlemen, boarding for ${airline.en} flight ${flight} to ${dest.en} is now complete. Thank you for your attention. We wish you a pleasant flight!`;
+      break;
+    case 'gatechange':
+      ru = `Уважаемые пассажиры, внимание! Для рейса ${airline.ru} ${flight} до ${dest.gen} выход на посадку изменён с номера ${gateOld} на номер ${gateNew}. Просим всех пассажиров пройти к выходу номер ${gateNew}. Приносим извинения за неудобства. Благодарим за внимание.`;
+      tl = `Uvazhayemyye passazhiry, vnimaniye! Dlya reysa ${airline.tl} ${flight} do ${dest.gtl} vykhod na posadku izmenon s nomera ${gateOld} na nomer ${gateNew}. Prosim vsekh passazhirov proyti k vykhodu nomer ${gateNew}. Prinosim izvineniya za neudobstva. Blagodarim za vnimaniye.`;
+      en = `Ladies and gentlemen, may I have your attention please. The boarding gate for ${airline.en} flight ${flight} to ${dest.en} has been changed from gate ${gateOld} to gate ${gateNew}. Would all passengers please proceed to gate ${gateNew}. We apologize for the inconvenience. Thank you.`;
+      break;
+    case 'delay':
+      ru = `Внимание! Авиакомпания ${airline.ru} сообщает о задержке рейса ${flight} до ${dest.gen} по причине ${reason.ru}. Дополнительная информация будет объявлена дополнительно. Приносим извинения за доставленные неудобства.`;
+      tl = `Vnimaniye! Aviakompaniya ${airline.tl} soobshchayet o zaderzhke reysa ${flight} do ${dest.gtl} po prichine ${reason.tl}. Dopolnitel'naya informatsiya budet obyavlena dopolnitel'no. Prinosim izvineniya za dostavlennyye neudobstva.`;
+      en = `Attention please. ${airline.en} regrets to announce the delay of flight ${flight} to ${dest.en} due to ${reason.en}. Further information will be announced shortly. We apologize for any inconvenience.`;
+      break;
+    case 'refresh':
+      ru = `Уважаемые пассажиры рейса ${airline.ru} ${flight} до ${dest.gen}! Приглашаем вас подойти к сотруднику у выхода номер ${gate} для получения напитков и закусок. От имени авиакомпании ${airline.ru} приносим извинения за задержку рейса. Благодарим за внимание.`;
+      tl = `Uvazhayemyye passazhiry reysa ${airline.tl} ${flight} do ${dest.gtl}! Priglashayem vas podoyti k sotrudniku u vykhoda nomer ${gate} dlya polucheniya napitkov i zakusok. Ot imeni aviakompanii ${airline.tl} prinosim izvineniya za zaderzhku reysa. Blagodarim za vnimaniye.`;
+      en = `Ladies and gentlemen, passengers of ${airline.en} flight ${flight} to ${dest.en}, please contact our ground staff at gate ${gate} for complimentary drinks and snacks. On behalf of ${airline.en}, we apologize for the delay. Thank you.`;
+      break;
+    case 'paging':
+      ru = `Уважаемые пассажиры, внимание! ${gram.ru_word} ${nameJoined}, ${gram.ru_part} рейсом ${airline.ru} ${flight} до ${dest.gen}, просим подойти к сотруднику у выхода на посадку номер ${gate}. Благодарим за внимание.`;
+      tl = `Uvazhayemyye passazhiry, vnimaniye! ${gram.tl_word} ${nameJoined}, ${gram.tl_part} reysom ${airline.tl} ${flight} do ${dest.gtl}, prosim podoyti k sotrudniku u vykhoda na posadku nomer ${gate}. Blagodarim za vnimaniye.`;
+      en = `Ladies and gentlemen, may I have your attention please. Would ${enPax} ${nameJoined}, travelling on ${airline.en} flight ${flight} to ${dest.en}, please contact our ground staff at gate ${gate}. Thank you.`;
+      break;
+  }
+  return {ru, tl, en, flight};
+}
+
+function buildChips(flight){
+  const chipsEl = document.getElementById('chips');
+  const chipsSection = document.getElementById('chipsSection');
+  chipsEl.innerHTML = '';
+  if(!flight || flight === '—'){ chipsSection.classList.add('hidden'); return; }
+  chipsSection.classList.remove('hidden');
+  for(const ch of flight){
+    let ru = ch, say = '';
+    if(LETTERS[ch]){ ru = LETTERS[ch][0]; say = LETTERS[ch][1]; }
+    else if(DIGITS[ch]){ ru = DIGITS[ch][0]; say = DIGITS[ch][1]; }
+    else { continue; }
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = `<span class="char">${ch} → ${ru}</span><span class="say">${say}</span>`;
+    chipsEl.appendChild(chip);
+  }
+}
+
+function render(){
+  const {ru, tl, en, flight} = buildAnnouncement();
+  document.getElementById('outRu').textContent = ru;
+  document.getElementById('outEn').textContent = en;
+  document.getElementById('outTl').textContent = tl;
+  buildChips(flight);
+}
+
+// ---------- Copy buttons ----------
+function copyText(text, msg){
+  const msgEl = document.getElementById('copyMsg');
+  function done(){
+    msgEl.textContent = msg;
+    setMascot('คัดลอกแล้ว เก่งมาก!', true);
+    setTimeout(()=>{ msgEl.textContent=''; }, 2200);
+  }
+  function fail(){
+    msgEl.textContent = 'คัดลอกไม่สำเร็จ ลองกดค้างที่ข้อความแล้วเลือกคัดลอก';
+    setTimeout(()=>{ msgEl.textContent=''; }, 4000);
+  }
+  function fallback(){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly','');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok ? done() : fail();
+    }catch(e){ fail(); }
+  }
+  try{
+    navigator.clipboard.writeText(text).then(done).catch(fallback);
+  }catch(e){
+    fallback();
+  }
+}
+document.getElementById('copyRu').addEventListener('click', ()=>{
+  copyText(document.getElementById('outRu').textContent, 'คัดลอกแล้ว ✓');
+});
+document.getElementById('copyEn').addEventListener('click', ()=>{
+  copyText(document.getElementById('outEn').textContent, 'คัดลอกแล้ว ✓');
+});
+document.getElementById('copyTl').addEventListener('click', ()=>{
+  copyText(document.getElementById('outTl').textContent, 'คัดลอกแล้ว ✓');
+});
+
+// ---------- Speech (Web Speech API) ----------
+let ruVoices = [];
+function loadVoices(){
+  if(!('speechSynthesis' in window)) return;
+  ruVoices = window.speechSynthesis.getVoices().filter(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
+  const hint = document.getElementById('voiceHint');
+  if(!hint) return;
+  if(ruVoices.length === 0){
+    hint.textContent = 'ไม่พบเสียงภาษารัสเซียในอุปกรณ์นี้ อาจพูดด้วยสำเนียง/เสียงเริ่มต้นแทน หรือลองติดตั้งเสียงรัสเซียในตั้งค่าอุปกรณ์';
+  } else {
+    hint.textContent = '';
+  }
+}
+if('speechSynthesis' in window){
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+document.getElementById('speakRu').addEventListener('click', ()=>{
+  const text = document.getElementById('outRu').textContent;
+  const hint = document.getElementById('voiceHint');
+  if(!('speechSynthesis' in window)){
+    hint.textContent = 'อุปกรณ์/เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง';
+    return;
+  }
+  if(!text || text.trim() === ''){ return; }
+  try{
+    window.speechSynthesis.cancel();
+    const rate = parseFloat(document.getElementById('speechRate').value) || 0.9;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'ru-RU';
+    utter.rate = rate;
+    utter.pitch = 1;
+    if(ruVoices.length > 0){ utter.voice = ruVoices[0]; }
+    utter.onerror = ()=>{ hint.textContent = 'เกิดข้อผิดพลาดขณะพูด ลองใหม่อีกครั้ง'; };
+    window.speechSynthesis.speak(utter);
+    setMascot('กำลังประกาศอยู่นะ', true);
+  }catch(e){
+    hint.textContent = 'ไม่สามารถอ่านออกเสียงได้ในอุปกรณ์นี้';
+  }
+});
+
+document.getElementById('stopSpeak').addEventListener('click', ()=>{
+  if('speechSynthesis' in window){ window.speechSynthesis.cancel(); }
+});
+
+// ---------- Init ----------
+document.getElementById('aeroflotPresetWrap').classList.toggle('hidden', document.getElementById('airline').value !== 'aeroflot');
+updateFieldVisibility();
+render();
+</script>
+</body>
+</html>
